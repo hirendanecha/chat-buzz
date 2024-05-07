@@ -39,7 +39,7 @@ export class SignUpComponent implements OnInit, AfterViewInit {
     file: null,
     url: '',
   };
-
+  passwordHidden: boolean = true;
   @ViewChild('zipCode') zipCode: ElementRef;
   captchaToken = '';
 
@@ -59,6 +59,7 @@ export class SignUpComponent implements OnInit, AfterViewInit {
     TermAndPolicy: new FormControl(false, Validators.required),
   });
   theme = '';
+  
   @ViewChild('captcha', { static: false }) captchaElement: ElementRef;
 
   constructor(
@@ -100,6 +101,11 @@ export class SignUpComponent implements OnInit, AfterViewInit {
         }
       },
     });
+  }
+
+  togglePasswordVisibility(passwordInput: HTMLInputElement) {
+    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+    this.passwordHidden = !this.passwordHidden;
   }
 
   selectFiles(event) {
