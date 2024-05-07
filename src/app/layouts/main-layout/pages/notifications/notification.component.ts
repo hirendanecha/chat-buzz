@@ -24,7 +24,7 @@ export class NotificationsComponent {
     private socketService: SocketService
   ) {
     const data = {
-      title: '2040.Chat Notification',
+      title: 'Chat.buzz Notification',
       url: `${location.href}`,
       description: '',
     };
