@@ -56,6 +56,7 @@ export class ProfileChatsSidebarComponent
   newChatList = [];
   approvedUserPage = 1;
   hasMoreUsers = false;
+  backCanvas: boolean = true;
   approvedUserData = [];
 
   userMenusOverlayDialog: any;
@@ -79,7 +80,8 @@ export class ProfileChatsSidebarComponent
     public encryptDecryptService: EncryptDecryptService,
     private modalService: NgbModal,
     private offcanvasService: NgbOffcanvas,
-    public activeOffCanvas: NgbActiveOffcanvas
+    public activeOffCanvas: NgbActiveOffcanvas,
+    private activeCanvas: NgbOffcanvas,
   ) {
     this.originalFavicon = document.querySelector('link[rel="icon"]');
     this.socketService?.socket?.on('isReadNotification_ack', (data) => {
@@ -119,6 +121,7 @@ export class ProfileChatsSidebarComponent
     this.getChatList();
     this.getGroupList();
     // this.getApprovedUserList();
+    this.backCanvas =this.activeCanvas.hasOpenOffcanvas();
   }
 
   ngAfterViewInit(): void {
