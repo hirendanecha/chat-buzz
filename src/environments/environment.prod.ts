@@ -1,6 +1,6 @@
 const url = 'https://api.chat.buzz';
 const webUrl = 'https://www.chat.buzz/';
-const tubeUrl = 'https://dev.tube.freedom.buzz/';
+const tubeUrl = 'https://dev.tube.chat.buzz/';
 
 // const url = 'http://localhost:8080';
 // const webUrl = 'http://localhost:4200/';
@@ -12,7 +12,7 @@ export const environment = {
   socketUrl: `${url}/`,
   webUrl: webUrl,
   tubeUrl: tubeUrl,
-  domain: '.freedom.buzz',
+  domain: '.chat.buzz',
   EncryptIV: 8625401029409790,
   EncryptKey: 8625401029409790,
   siteKey: '0x4AAAAAAAUs_fGBFffjsAnG',

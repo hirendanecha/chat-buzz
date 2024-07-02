@@ -5,7 +5,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { RouterModule } from '@angular/router';
 import { ImgPickerComponent } from './components/img-picker/img-picker.component';
 import { PostMetaDataCardComponent } from './components/post-meta-data-card/post-meta-data-card.component';
-import { NgxTrimDirectiveModule } from 'ngx-trim-directive';
+// import { NgxTrimDirectiveModule } from 'ngx-trim-directive';
 import { TagUserInputComponent } from './components/tag-user-input/tag-user-input.component';
 import { ImgPreviewComponent } from './components/img-preview/img-preview.component';
 import { InlineLoaderComponent } from './components/inline-loader/inline-loader.component';
@@ -89,7 +89,12 @@ import {
   faRepeat,
   faEyeSlash,
   faMobile,
-  faSquarePlus
+  faSquarePlus,
+  faPhoneFlip,
+  faVoicemail,
+  faPhoneVolume,
+  faCircleChevronUp,
+  faCircleChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import { PipeModule } from './pipe/pipe.module';
 import { ForgotPasswordComponent } from '../layouts/auth-layout/pages/forgot-password/forgot-password.component';
@@ -114,6 +119,7 @@ import { QrScanModalComponent } from './modals/qrscan-modal/qrscan-modal.compone
 import { ForwardChatModalComponent } from './modals/forward-chat-modal/forward-chat-modal.component';
 import { AppQrModalComponent } from './modals/app-qr-modal/app-qr-modal.component';
 import { ConferenceLinkComponent } from './modals/create-conference-link/conference-link-modal.component';
+import { NgxTrimDirectiveModule } from 'ngx-trim-directive';
 
 const sharedComponents = [
   ConfirmationModalComponent,
@@ -245,6 +251,11 @@ export class SharedModule {
       faMobile,
       faSquarePlus,
       faChevronLeft,
+      faPhoneFlip,
+      faVoicemail,
+      faPhoneVolume,
+      faCircleChevronUp,
+      faCircleChevronDown
     );
   }
 }
