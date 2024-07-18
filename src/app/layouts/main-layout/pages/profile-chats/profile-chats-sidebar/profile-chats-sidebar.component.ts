@@ -29,6 +29,7 @@ import { ToastService } from 'src/app/@shared/services/toast.service';
 import { MessageService } from 'src/app/@shared/services/message.service';
 import { AppQrModalComponent } from 'src/app/@shared/modals/app-qr-modal/app-qr-modal.component';
 import { ConferenceLinkComponent } from 'src/app/@shared/modals/create-conference-link/conference-link-modal.component';
+import { TokenStorageService } from 'src/app/@shared/services/token-storage.service';
 
 @Component({
   selector: 'app-profile-chats-sidebar',
@@ -48,6 +49,7 @@ export class ProfileChatsSidebarComponent
   userList: any = [];
   profileId: number;
   selectedChatUser: any;
+  userId:number;
 
   isMessageSoundEnabled: boolean = true;
   isCallSoundEnabled: boolean = true;
@@ -82,7 +84,9 @@ export class ProfileChatsSidebarComponent
     private offcanvasService: NgbOffcanvas,
     public activeOffCanvas: NgbActiveOffcanvas,
     private activeCanvas: NgbOffcanvas,
+    private tokenStorageService:TokenStorageService
   ) {
+    this.userId = +localStorage.getItem('user_id');
     this.originalFavicon = document.querySelector('link[rel="icon"]');
     this.socketService?.socket?.on('isReadNotification_ack', (data) => {
       if (data?.profileId) {
@@ -389,15 +393,15 @@ export class ProfileChatsSidebarComponent
     }
   }
 
-  openProfileMenuModal(): void {
-    this.userMenusOverlayDialog = this.modalService.open(
-      ProfileMenusModalComponent,
-      {
-        keyboard: true,
-        modalDialogClass: 'profile-menus-modal',
-      }
-    );
-  }
+  // openProfileMenuModal(): void {
+  //   this.userMenusOverlayDialog = this.modalService.open(
+  //     ProfileMenusModalComponent,
+  //     {
+  //       keyboard: true,
+  //       modalDialogClass: 'profile-menus-modal',
+  //     }
+  //   );
+  // }
 
   openNotificationsMobileModal(): void {
     this.activeOffCanvas?.close();
@@ -433,5 +437,26 @@ export class ProfileChatsSidebarComponent
     );
     const status = user?.status;
     return status;
+  }
+  logout(): void {
+    this.socketService?.socket?.emit('offline', (data) => {
+      console.log('user=>', data)
+    })
+    this.socketService?.socket?.on('get-users', (data) => {
+      data.map(ele => {
+        if (!this.sharedService.onlineUserList.includes(ele.userId)) {
+          this.sharedService.onlineUserList.push(ele.userId)
+        }
+      })
+    })
+    this.customerService.logout().subscribe({
+      next: (res => {
+        this.tokenStorageService.signOut();
+        console.log(res)
+      })
+    });
+  }
+  goToSetting() {
+    this.router.navigate([`settings/edit-profile/${this.userId}`]);
   }
 }
