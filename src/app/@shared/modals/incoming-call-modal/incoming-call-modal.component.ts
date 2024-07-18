@@ -115,7 +115,7 @@ export class IncomingcallModalComponent
           state: { chatDataPass },
         });
       } else {
-        const callId = this.calldata.link.replace('https://meet.facetime.tube/', '');
+        const callId = this.calldata.link.replace('https://facetime.tube/', '');
         this.router.navigate([`/Buzz-call/${callId}`], {
           state: { chatDataPass },
         });
