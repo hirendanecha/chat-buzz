@@ -1095,6 +1095,10 @@ li {
   }
 }
 
+.modal-header{
+  justify-content: space-between;
+}
+
 ::-webkit-scrollbar {
   width: 8px !important;
   background-color: #f5f5f5 !important;
