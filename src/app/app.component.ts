@@ -101,22 +101,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.notificationId = data.id;
           if (data?.actionType === 'T') {
-            var sound = new Howl({
-              src: [
-                'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-notification.mp3',
-              ],
-            });
             // const notificationSoundOct = JSON.parse(
             //   localStorage.getItem('soundPreferences')
             // )?.notificationSoundEnabled;
-            // if (notificationSoundOct !== 'N') {
-            //   if (sound) {
-            //     sound?.play();
-            //   }
-            // }
             this.sharedService.loginUserInfo.subscribe((user) => {
               const tagNotificationSound = user.tagNotificationSound;
               if (tagNotificationSound === 'Y') {
+                var sound = new Howl({
+                  src: [
+                    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-notification.mp3',
+                  ],
+                  volume: 0.8,
+                  html5: true,
+                });
                 if (sound) {
                   sound?.play();
                 }
@@ -128,12 +125,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
             data?.notificationByProfileId !== this.profileId
           ) {
             this.newRoomCreated.emit(true);
-            var sound = new Howl({
-              src: [
-                'https://s3.us-east-1.wasabisys.com/freedom-social/messageTone.mp3',
-              ],
-              volume: 0.5,
-            });
             // const messageSoundOct = JSON.parse(
             //   localStorage.getItem('soundPreferences')
             // )?.messageSoundEnabled;
@@ -145,6 +136,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sharedService.loginUserInfo.subscribe((user) => {
               const messageNotificationSound = user.messageNotificationSound;
               if (messageNotificationSound === 'Y') {
+                var sound = new Howl({
+                  src: [
+                    'https://s3.us-east-1.wasabisys.com/freedom-social/messageTone.mp3',
+                  ],
+                  volume: 0.8,
+                  html5: true,
+                });
                 if (sound) {
                   sound?.play();
                 }
@@ -189,7 +187,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
                 roomId: data.roomId || null,
                 groupId: data.groupId || null,
               };
-              if (!window.document.hidden) {
+              if (!window.document.hidden && this.sharedService.isCorrectBrowserSession()) {
                 const callIdMatch = data.link.match(/callId-\d+/);
                 const callId = callIdMatch ? callIdMatch[0] : data.link;
                 this.router.navigate([`/Buzz-call/${callId}`], {

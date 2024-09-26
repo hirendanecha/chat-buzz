@@ -19,7 +19,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import { SocketService } from 'src/app/@shared/services/socket.service';
 import { SharedService } from 'src/app/@shared/services/shared.service';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { EncryptDecryptService } from 'src/app/@shared/services/encrypt-decrypt.service';
 import { CreateGroupModalComponent } from 'src/app/@shared/modals/create-group-modal/create-group-modal.component';
 import { ProfileMenusModalComponent } from '../../../components/profile-menus-modal/profile-menus-modal.component';
@@ -42,15 +42,15 @@ export class ProfileChatsSidebarComponent
   chatList: any = [];
   pendingChatList: any = [];
   groupList: any = [];
-
+  
   @ViewChild('userSearchDropdownRef', { static: false, read: NgbDropdown })
   userSearchNgbDropdown: NgbDropdown;
   searchText = '';
   userList: any = [];
   profileId: number;
   selectedChatUser: any;
+  qrLink = '';
   userId:number;
-
   isMessageSoundEnabled: boolean;
   isCallSoundEnabled: boolean;
   isChatLoader = false;
@@ -62,6 +62,7 @@ export class ProfileChatsSidebarComponent
   approvedUserData = [];
 
   userMenusOverlayDialog: any;
+  hideOngoingCallButton: boolean = false;
 
   @Output('newRoomCreated') newRoomCreated: EventEmitter<any> =
     new EventEmitter<any>();
@@ -104,6 +105,12 @@ export class ProfileChatsSidebarComponent
     // if (notificationSound?.callSoundEnabled === 'N') {
     //   this.isCallSoundEnabled = false;
     // }
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.hideOngoingCallButton = this.router.url.includes('Buzz-call');
+        this.sharedService.callId = sessionStorage.getItem('callId') || null;
+      }
+    });
     this.sharedService.loginUserInfo.subscribe((user) => {
       this.isCallSoundEnabled =
         user?.callNotificationSound === 'Y' ? true : false;
@@ -261,7 +268,7 @@ export class ProfileChatsSidebarComponent
   // }
 
   onChat(item: any) {
-    console.log(item);
+    // console.log(item);
     this.selectedChatUser = item.roomId || item.groupId;
     item.unReadMessage = 0;
     if (item.groupId) {
@@ -297,7 +304,7 @@ export class ProfileChatsSidebarComponent
     };
     this.customerService.updateNotificationSound(soundObj).subscribe({
       next: (res) => {
-        console.log(res);
+        // console.log(res);
         this.toasterService.success(res.message);
         this.sharedService.getUserDetails();
       },
@@ -423,13 +430,13 @@ export class ProfileChatsSidebarComponent
   //   );
   // }
 
-  openNotificationsMobileModal(): void {
+    openNotificationsMobileModal(): void {
     this.activeOffCanvas?.close();
     this.offcanvasService.open(NotificationsModalComponent, {
       position: 'end',
       panelClass: 'w-300-px',
     });
-  }
+  }  
 
   appQrmodal(){
     const modalRef = this.modalService.open(AppQrModalComponent, {
@@ -460,7 +467,7 @@ export class ProfileChatsSidebarComponent
   }
   logout(): void {
     this.socketService?.socket?.emit('offline', (data) => {
-      console.log('user=>', data)
+      // console.log('user=>', data)
     })
     this.socketService?.socket?.on('get-users', (data) => {
       data.map(ele => {
@@ -472,7 +479,7 @@ export class ProfileChatsSidebarComponent
     this.customerService.logout().subscribe({
       next: (res => {
         this.tokenStorageService.signOut();
-        console.log(res)
+        // console.log(res)
       })
     });
   }

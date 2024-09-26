@@ -10,7 +10,6 @@
   //     border-top: 1px solid var(--bs-border-color) !important;
   //   }
   .sidebar-head-text {
-    // max-width: 178px;
     max-width: 143px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -86,6 +85,7 @@
       width: 12px;
       height: 12px;
       // background: var(--highlight-color);
+      background: #00a469;
       border-radius: 50%;
     }
     .abs-activity {
@@ -97,7 +97,7 @@
       background: #00a469;
       border-radius: 50%;
     }
-
+    
     .abs-active {
       background: #00a469;
     }
@@ -106,7 +106,7 @@
     }
     .abs-dnd {
       background: red;
-    }
+    } 
     .abs-invisible{
       background: rgb(156, 155, 155);
     }
@@ -126,6 +126,18 @@
     max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .ongoing-call {
+    width: 42px;
+    height: 42px;
+    background: var(--ongoing-call);
+    border-radius: 12px;
+    cursor: pointer;
+
+    i {
+      color: var(--para-3rd-color);
+    }
   }
 }
 

@@ -1,10 +1,12 @@
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   HostListener,
   Input,
   OnDestroy,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Howl } from 'howler';
@@ -30,6 +32,8 @@ export class IncomingcallModalComponent
   @Input() title: string = 'Incoming call...';
   @Input() calldata: any;
   @Input() sound: any;
+  @ViewChild('focusElement') focusElement!: ElementRef;
+
   hangUpTimeout: any;
   currentURL: any = [];
   profileId: number;
@@ -48,10 +52,11 @@ export class IncomingcallModalComponent
     private sharedService: SharedService
   ) {
     this.profileId = +localStorage.getItem('profileId');
-    this.isOnCall = this.router.url.includes('/Buzz-call/') || false;
+    // this.isOnCall = this.router.url.includes('/Buzz-call/') || false;
   }
-
+  
   ngAfterViewInit(): void {
+    this.isOnCall = this.calldata?.isOnCall === 'Y' || false;
     this.soundControlService.initStorageListener();
     // this.sound?.close();
     this.soundEnabledSubscription =
@@ -84,10 +89,13 @@ export class IncomingcallModalComponent
     }
     this.socketService.socket?.on('notification', (data: any) => {
       if (data?.actionType === 'DC') {
-        this.sound.stop();
+        this.sound?.stop();
         this.activateModal.close('cancel');
       }
     });
+    if (this.focusElement) {
+      this.focusElement.nativeElement.click();
+    }
   }
 
   ngOnInit(): void {
@@ -130,7 +138,7 @@ export class IncomingcallModalComponent
           state: { chatDataPass },
         });
       }
-      // this.router.navigate([`/freedom-call/${callId}`]);
+      // this.router.navigate([`/Buzz-call/${callId}`]);
       this.sound?.stop();
     }
     this.activateModal.close('success');
@@ -143,13 +151,13 @@ export class IncomingcallModalComponent
       notificationByProfileId:
         this.calldata.notificationToProfileId || this.profileId,
       link: this.calldata.link,
-    };   
+    };
     const buzzRingData = {
       actionType: 'DC',
       notificationByProfileId: this.profileId,
       notificationDesc: 'decline call...',
       notificationToProfileId: this.calldata.notificationToProfileId,
-      domain: 'chat.buzz',
+      domain: 'Chat.buzz',
     };
     this.customerService.startCallToBuzzRing(buzzRingData).subscribe({
       // next: (data: any) => {},
@@ -202,5 +210,7 @@ export class IncomingcallModalComponent
 
   ngOnDestroy(): void {
     this.soundEnabledSubscription?.unsubscribe();
+    this.calldata = null;
+    this.sound = null;
   }
 }

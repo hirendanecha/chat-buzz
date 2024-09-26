@@ -44,6 +44,8 @@ import { PostService } from 'src/app/@shared/services/post.service';
 import { HttpEventType } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
 import { ProfileMenusModalComponent } from '../../../components/profile-menus-modal/profile-menus-modal.component';
+import { SoundControlService } from 'src/app/@shared/services/sound-control.service';
+import { IncomingcallModalComponent } from 'src/app/@shared/modals/incoming-call-modal/incoming-call-modal.component';
 
 @Component({
   selector: 'app-profile-chats-list',
@@ -104,7 +106,7 @@ export class ProfileChatsListComponent
   activePage = 1;
   hasMoreData = false;
   qrLink = '';
-
+  
   typingData: any = {};
   isTyping = false;
   typingTimeout: any;
@@ -134,7 +136,8 @@ export class ProfileChatsListComponent
   isLoading: boolean = false;
   callRoomId: number;
   userMenusOverlayDialog: any;
-
+  unreadMessage: any = {};
+  relevantMembers: any = [];
   // messageList: any = [];
   @ViewChildren('message') messageElements: QueryList<ElementRef>;
   constructor(
@@ -152,7 +155,7 @@ export class ProfileChatsListComponent
     private postService: PostService,
     private router: Router,
     private renderer: Renderer2,
-    
+    private soundControlService: SoundControlService
   ) {
     this.userId = +this.route.snapshot.paramMap.get('id');
     this.profileId = +localStorage.getItem('profileId');
@@ -164,6 +167,48 @@ export class ProfileChatsListComponent
     if (this.callRoomId) {
       localStorage.removeItem('callRoomId')
       this.callRoomId = null
+    }
+
+    if (!this.sidebarClass) {      
+      const reqObj = {
+        profileId: this.profileId,
+      };
+      this.socketService?.checkCall(reqObj, (data: any) => {
+        if (data?.isOnCall === 'Y' && data?.callLink) {
+          var callSound = new Howl({
+            src: [
+              'https://s3.us-east-1.wasabisys.com/freedom-social/famous_ringtone.mp3',
+            ],
+            loop: true,
+          });
+          this.soundControlService.initTabId();
+          const modalRef = this.modalService.open(IncomingcallModalComponent, {
+            centered: true,
+            size: 'sm',
+            backdrop: 'static',
+          });
+          const callData = {
+            Username: '',
+            link: data?.callLink,
+            roomId: data.roomId,
+            groupId: data.groupId,
+            ProfilePicName: this.sharedService?.userData?.ProfilePicName,
+          };
+          modalRef.componentInstance.calldata = callData;
+          modalRef.componentInstance.sound = callSound;
+          modalRef.componentInstance.title = 'Join existing call...';
+          modalRef.result.then((res) => {
+            if (res === 'cancel') {
+              const callLogData = {
+                profileId: this.profileId,
+                roomId: callData?.roomId,
+                groupId: callData?.groupId,
+              }
+              this.socketService?.endCall(callLogData);
+            }
+          })
+        }
+      });
     }
   }
 
@@ -213,7 +258,7 @@ export class ProfileChatsListComponent
           }
           const array = new MessageDatePipe().transform(this.messageList);
           this.filteredMessageList = array;
-          if (this.userChat.groupId === data.groupId) {
+          if (this.userChat.groupId === data?.groupId) {
             if (this.userChat?.groupId) {
               const date = moment(new Date()).utc();
               const oldChat = {
@@ -222,7 +267,7 @@ export class ProfileChatsListComponent
                 date: moment(date).format('YYYY-MM-DD HH:mm:ss'),
               };
               this.socketService.switchChat(oldChat, (data) => {
-                console.log(data);
+                // console.log(data);
               });
             }
             this.socketService.readGroupMessage(data, (readUsers) => {
@@ -232,9 +277,9 @@ export class ProfileChatsListComponent
             });
           }
         }
-        if (this.userChat.roomId === data.roomId) {
+        if (this.userChat.roomId === data?.roomId) {
           const readData = {
-            ids: [data.id],
+            ids: [data?.id],
             profileId: this.userChat.profileId,
           };
           this.socketService.readMessage(readData, (res) => {
@@ -248,8 +293,8 @@ export class ProfileChatsListComponent
     });
     this.socketService.socket.on('seen-room-message', (data) => {
       this.readMessageRoom = 'Y';
+      this.unreadMessage = {};
     });
-
     this.socketService.socket?.on('get-users', (data) => {
       const index = data.findIndex((ele) => {
         return ele.userId === this.profileId;
@@ -262,13 +307,9 @@ export class ProfileChatsListComponent
           });
         });
       }
-      console.log(this.sharedService.onlineUserList);
+      // console.log(this.sharedService.onlineUserList);
     });
     this.socketService.socket?.emit('online-users');
-    this.socketService.socket?.on('typing', (data) => {
-      // console.log('typingData', data)
-      this.typingData = data;
-    });
     if (this.userChat.groupId) {
       this.socketService.socket.on('read-message-user', (data) => {
         this.readMessagesBy = data?.filter(
@@ -309,15 +350,18 @@ export class ProfileChatsListComponent
             });
           });
         }
-        console.log(this.sharedService.onlineUserList);
+        // console.log(this.sharedService.onlineUserList);
       });
       this.findUserStatus(this.userChat.profileId);
     }
-    this.messageElements.changes.subscribe(() => {
+    this.messageElements?.changes?.subscribe(() => {
       this.resetIndex();
     });
+    this.socketService.socket?.on('typing', (data) => {
+      this.typingData = data;
+    });
   }
-
+  
   // scroller down
   ngAfterViewChecked() {}
 
@@ -567,6 +611,45 @@ export class ProfileChatsListComponent
     const array = new MessageDatePipe().transform(this.messageList);
     // console.log(array);
     this.filteredMessageList = array;
+    if (this.userChat?.roomId) {
+      this.unreadMessage = {};
+      for (let group of this.filteredMessageList) {
+        const unreadMessage = group.messages.find(
+          (message: any) => message.isRead === 'N'
+        );
+        if (unreadMessage) {
+          this.unreadMessage = { date: group.date, message: unreadMessage };
+          break;
+        }
+      }
+    }
+    if (this.userChat?.groupId) {
+      for (let group of this.filteredMessageList) {
+        this.groupData?.memberList?.forEach((member) => {
+          const matchingMessage = group.messages.find(
+            (msg) =>
+              member?.switchDate < msg.createdDate &&
+              member?.profileId !== this.profileId &&
+              msg.sentBy == this.profileId
+          );
+
+          if (matchingMessage) {
+            member['message'] = matchingMessage;
+            const existUser = this.relevantMembers.find(
+              (e) => e?.profileId === member?.profileId
+            );
+            if (existUser) {
+              this.readMessagesBy = this.readMessagesBy.filter((e) => {
+                return e.ID !== existUser?.profileId;
+              });
+            }
+            if (!existUser) {
+              this.relevantMembers.push(member);
+            }
+          }
+        });
+      }
+    }
   }
 
   scrollToBottom() {
@@ -675,17 +758,12 @@ export class ProfileChatsListComponent
     }
   }
 
-
   updateProgress(): number {
     return (this.progressValue / 100) * 360;
   }
 
   resetData(): void {
     document.removeEventListener('keyup', this.onKeyUp);
-    // if (this.isFileUploadInProgress) {
-    //   this.cancelUpload$.next();
-    //   this.isFileUploadInProgress = false;
-    // }
     this.progressValue = 0;
     this.chatObj['id'] = null;
     this.chatObj.parentMessageId = null;
@@ -774,7 +852,7 @@ export class ProfileChatsListComponent
     }
     this.chatObj.parentMessageId = msgObj?.id;
     this.replyMessage.msgText = msgObj.messageText;
-    this.replyMessage.createdDate = msgObj.createdDate;
+    this.replyMessage.createdDate = msgObj?.createdDate;
     this.replyMessage.Username = msgObj.Username;
     if (!msgObj.messageText) {
       if (this.isFile(msgObj.messageMedia)) {
@@ -879,8 +957,6 @@ export class ProfileChatsListComponent
                 };
                 resolve(this.metaData);
               } else {
-                // this.metaData.metalink = url;
-                // resolve(this.metaData);
                 const metatitles = res?.meta?.title;
                 const metatitle = Array.isArray(metatitles)
                   ? metatitles?.[0]
@@ -1034,6 +1110,12 @@ export class ProfileChatsListComponent
               console.log(err);
             },
           });
+          const callLogData = {
+            profileId: this.profileId,
+            roomId: this.userChat?.roomId,
+            groupId: this.userChat?.groupId,
+          }
+          this.socketService?.endCall(callLogData);
         }
       }
     });
@@ -1213,25 +1295,29 @@ export class ProfileChatsListComponent
 
   scrollToHighlighted(index: number) {
     this.messageElements.forEach((element) => {
-      const currentHighlighted =
-        element.nativeElement.querySelector('.highlighted');
-      if (currentHighlighted) {
-        this.renderer.removeClass(currentHighlighted, 'highlighted');
-      }
+      const highlightedSpans =
+        element.nativeElement.querySelectorAll('.highlighted');
+      highlightedSpans.forEach((span) => {
+        this.renderer.removeClass(span, 'highlighted');
+      });
     });
     const highlightedElements = this.messageElements
       .toArray()
       .filter(
-        (element) => element.nativeElement.querySelector('.highlight') !== null
+        (element) =>
+          element.nativeElement.querySelectorAll('.highlight').length > 0
       );
 
     if (index >= 0 && index < highlightedElements.length) {
       const element = highlightedElements[index];
-      const highlightedSpan = element.nativeElement.querySelector('.highlight');
-
-      if (highlightedSpan) {
-        this.renderer.addClass(highlightedSpan, 'highlighted');
-        element.nativeElement.scrollIntoView({
+      const highlightedSpans =
+        element.nativeElement.querySelectorAll('.highlight');
+      highlightedSpans.forEach((span) => {
+        this.renderer.addClass(span, 'highlighted');
+      });
+      const firstHighlightedSpan = highlightedSpans[0];
+      if (firstHighlightedSpan) {
+        firstHighlightedSpan.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         });
@@ -1241,7 +1327,7 @@ export class ProfileChatsListComponent
 
   onSearch(event): void {
     // this.searchQuery = event.target.value;
-    console.log(event.target.value);
+    // console.log(event.target.value);
     if (event.target.value) {
       this.scrollToHighlighted(this.currentHighlightedIndex);
     } else {
@@ -1261,8 +1347,6 @@ export class ProfileChatsListComponent
       this.currentHighlightedIndex =
       (this.currentHighlightedIndex - 1 + highlightedElements.length) %
       highlightedElements.length;
-      console.log(this.currentHighlightedIndex);
-
       this.scrollToHighlighted(this.currentHighlightedIndex);
     }
   }
@@ -1277,7 +1361,7 @@ export class ProfileChatsListComponent
     if (highlightedElements.length > 0) {
       this.currentHighlightedIndex =
         (this.currentHighlightedIndex + 1 % highlightedElements.length);
-       
+
       this.scrollToHighlighted(this.currentHighlightedIndex);
     }
   }
