@@ -59,31 +59,20 @@ export class IncomingcallModalComponent
   ngAfterViewInit(): void {
     this.isOnCall = this.calldata?.isOnCall === 'Y' || false;
     this.soundControlService.initStorageListener();
-    // this.sound?.close();
+    this.soundEnabledSubscription =
+      this.soundControlService.soundEnabled$.subscribe((soundEnabled) => {
+        if (soundEnabled === false) {
+          this.sound?.stop();
+        }
+      });
     this.sharedService.loginUserInfo.subscribe((user) => {
-      this.soundTrigger = user.callNotificationSound;
+     this.soundTrigger = user.callNotificationSound
     });
     if (this.soundTrigger === 'Y' && this.calldata.id) {
       if (this.sound) {
         this.sound?.play();
       }
     }
-    // const SoundOct = JSON.parse(
-    //   localStorage.getItem('soundPreferences')
-    // )?.callSoundEnabled;
-    // if (SoundOct !== 'N') {
-    //   if (this.sound) {
-    //     this.sound?.play();
-    //   }
-    // }
-    this.sharedService.loginUserInfo.subscribe((user) => {
-      const callNotificationSound = user.callNotificationSound;
-      if (callNotificationSound === 'Y') {
-        if (this.sound) {
-          this.sound?.play();
-        }
-      }
-    });
     if (!this.hangUpTimeout) {
       this.hangUpTimeout = setTimeout(() => {
         this.hangUpCall(false, '');
