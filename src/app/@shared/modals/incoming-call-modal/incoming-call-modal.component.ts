@@ -39,6 +39,7 @@ export class IncomingcallModalComponent
   profileId: number;
   soundEnabledSubscription: Subscription;
   isOnCall = false;
+  soundTrigger: string;
 
   constructor(
     public activateModal: NgbActiveModal,
@@ -59,13 +60,14 @@ export class IncomingcallModalComponent
     this.isOnCall = this.calldata?.isOnCall === 'Y' || false;
     this.soundControlService.initStorageListener();
     // this.sound?.close();
-    this.soundEnabledSubscription =
-      this.soundControlService.soundEnabled$.subscribe((soundEnabled) => {
-        if (soundEnabled === false) {
-          // console.log(soundEnabled);
-          this.sound?.stop();
-        }
-      });
+    this.sharedService.loginUserInfo.subscribe((user) => {
+      this.soundTrigger = user.callNotificationSound;
+    });
+    if (this.soundTrigger === 'Y' && this.calldata.id) {
+      if (this.sound) {
+        this.sound?.play();
+      }
+    }
     // const SoundOct = JSON.parse(
     //   localStorage.getItem('soundPreferences')
     // )?.callSoundEnabled;
