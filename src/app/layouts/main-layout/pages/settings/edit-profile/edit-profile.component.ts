@@ -30,7 +30,6 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
   allCountryData: any;
   confirm_password = '';
   msg = '';
-  userId : number;
   userMail: string;
   profilePic: any = {};
   coverPic: any = {};
@@ -49,7 +48,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
   };
   isNotificationSoundEnabled: boolean = true;
   authToken: string;
-  qrLink = '';
+  // qrLink = '';
 
   constructor(
     private modalService: NgbModal,
@@ -61,18 +60,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
     public sharedService: SharedService,
     private toastService: ToastService,
     private uploadService: UploadFilesService,
-  ) {
-    this.userlocalId = +localStorage.getItem('user_id');
-    this.userId = +this.route.snapshot.paramMap.get('id');
-    this.profileId = +localStorage.getItem('profileId');
-    this.userMail = JSON.parse(localStorage.getItem('auth-user'))?.Email;
-    if (this.profileId) {
-      this.getProfile(this.profileId);
-      this.authToken = localStorage.getItem('auth-token');
-    }
-    this.qrLink = `${environment.qrLink}${this.userId}?token=${this.authToken}`;
-
-  }
+  ) {}
 
   ngOnInit(): void {
     if (!this.tokenStorage.getToken()) {
@@ -85,6 +73,14 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
     // }
     this.sharedService.loginUserInfo.subscribe((user) => {
       this.isNotificationSoundEnabled = user?.tagNotificationSound === 'Y' ? true : false;
+      this.userlocalId = +user.UserID;
+      this.profileId = +user.Id;
+      this.userMail = user.Email;
+      if (this.profileId) {
+        this.getProfile(this.profileId);
+        this.authToken = localStorage.getItem('auth-token');
+      }
+      // this.qrLink = `${environment.qrLink}${this.userlocalId}?token=${this.authToken}`;
     });
   }
 
@@ -111,7 +107,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
     };
     this.customerService.updateNotificationSound(soundObj).subscribe({
       next: (res) => {
-        console.log(res);
+        // console.log(res);
         this.toastService.success(res.message);
         this.sharedService.getUserDetails();
       },
@@ -128,7 +124,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
         if (data) {
           this.spinner.hide();
           this.customer = data;
-          console.log(data);
+          // console.log(data);
           this.getAllCountries();
         }
       },
@@ -231,7 +227,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
 
       forkJoin(uploadObs).subscribe({
         next: (res: any) => {
-          console.log(res);
+          // console.log(res);
           if (res?.profileImg?.body?.url) {
             this.profileImg['file'] = null;
             this.profileImg['url'] = res?.profileImg?.body?.url;
@@ -262,8 +258,8 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
       this.customer.ProfilePicName = this.profileImg?.url || this.customer.ProfilePicName;
       this.customer.CoverPicName = this.profileCoverImg?.url || this.customer.CoverPicName;
       this.customer.IsActive = 'Y';
-      this.customer.UserID = +this.userId;
-      console.log('update', this.customer)
+      this.customer.UserID = this.userlocalId;
+      // console.log('update', this.customer)
       this.customerService.updateProfile(this.profileId, this.customer).subscribe({
         next: (res: any) => {
           this.spinner.hide();
@@ -290,7 +286,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
         this.spinner.hide();
         if (res.data) {
           this.customer = res.data[0];
-          console.log(this.customer)
+          // console.log(this.customer)
           this.getAllCountries();
         }
       },
@@ -339,7 +335,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
   }
   onChangeTag(event) {
     this.customer.Username = event.target.value.replaceAll(' ', '').replaceAll(/\s*,+\s*/g, ',');
-    console.log(this.customer.Username);
+    // console.log(this.customer.Username);
   }
 
   convertToUppercase(event: any) {
