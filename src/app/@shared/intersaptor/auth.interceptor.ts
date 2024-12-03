@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import {
+  HttpInterceptor,
+  HttpHandler,
+  HttpRequest,
+} from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
@@ -17,7 +21,7 @@ export class AuthInterceptor implements HttpInterceptor {
     const authRequest = request.clone({
       setHeaders: {
         Authorization: `Bearer ${authToken}`
-      }
+      },
     });
     return next.handle(authRequest);
   }

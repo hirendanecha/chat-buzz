@@ -14,13 +14,12 @@ import { AuthService } from 'src/app/@shared/services/auth.service';
 })
 export class ResetPasswordComponent {
   @ViewChild('changePassword') changePassword: NgForm | any;
-  showPassword = false;
+  passwordHidden: boolean = true;
   loading = false;
   submitted = false;
   msg = '';
   type = '';
   userAccessToken: any;
-  passwordHidden: boolean = true;
   constructor(
     private modalService: NgbModal,
     private router: Router,
@@ -36,7 +35,7 @@ export class ResetPasswordComponent {
 
     this.spinner.hide();
   }
-
+  
   togglePasswordVisibility(passwordInput: HTMLInputElement) {
     passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
     this.passwordHidden = !this.passwordHidden;
@@ -103,7 +102,7 @@ export class ResetPasswordComponent {
         error: (error) => {
           this.loading = false;
           this.submitted = false;
-          this.msg = 'You have entered the wrong password or username';
+          this.msg = 'You have entered the wrong password or username.';
           this.type = 'danger';
         },
       });

@@ -192,7 +192,7 @@ export class SocketService {
   switchChat(params, callback: (data: any) => void) {
     this.socket.emit('switch-group', params, callback);
   }
-
+  
   switchOnlineStatus(params, callback: (data: any) => void) {
     this.socket.emit('change-status', params, callback);
   }
@@ -207,5 +207,9 @@ export class SocketService {
 
   endCall(params) {
     this.socket.emit('end-call', params);
+  }
+
+  checkRoom(params, callback: (data: any) => void) {
+    this.socket.emit('check-room', params, callback);
   }
 }

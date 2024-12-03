@@ -68,7 +68,6 @@ export class MediaGalleryComponent implements OnInit {
     return FILE_EXTENSIONS.some((ext) => media?.endsWith(ext));
   }
 
-
   pdfView(pdfUrl: string) {
     window.open(pdfUrl);
   }

@@ -104,7 +104,6 @@ export class ForwardChatModalComponent implements OnInit {
     return FILE_EXTENSIONS.some((ext) => media?.endsWith(ext));
   }
 
-
   isButtonDisabled(item: any): boolean {
     return this.selectedItems.some((disabledItem) => disabledItem === item);
   }

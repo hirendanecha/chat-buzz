@@ -34,9 +34,9 @@
       <div
         class="alert alert-{{ type }}"
         role="alert"
-        *ngIf="registrationMessage || msg"
+        *ngIf="registrationMessage"
       >
-        {{ registrationMessage || msg }}
+        {{ registrationMessage }}
       </div>
       <div class="row">
         <div class="col-12 col-md-6 mb-3">
@@ -65,8 +65,9 @@
 
         <div class="col-12 col-md-6 mb-3 d-flex flex-column">
           <label class="form-label"
-            >Profile Picture<span class="text-danger"></span
-          ></label>
+            >Profile Picture
+            <!-- <span class="text-danger"></span> -->
+          </label>
           <app-img-picker (onFileChange)="selectFiles($event)" />
         </div>
 
@@ -140,7 +141,11 @@
               autocomplete="new-password"
               #passwordInput
             />
-            <fa-icon [icon]="passwordHidden ? ['fas', 'eye'] : ['fas', 'eye-slash']" class="font-20-px position-absolute" (click)="togglePasswordVisibility(passwordInput)"></fa-icon>
+            <fa-icon
+              [icon]="passwordHidden ? ['fas', 'eye'] : ['fas', 'eye-slash']"
+              class="font-20-px position-absolute cursor"
+              (click)="togglePasswordVisibility(passwordInput)"
+            ></fa-icon>
           </div>
           <div
             class="text-danger"
@@ -157,18 +162,28 @@
           <label class="form-label"
             >Confirm Password<span class="text-danger">*</span></label
           >
-          <input
-            type="password"
-            class="input-area"
-            required
-            name="confirmPassword"
-            placeholder="Enter confirm password"
-            (focusout)="validatepassword()"
-            (input)="changetopassword($event)"
-            (keyup)="changetopassword($event)"
-            formControlName="confirm_password"
-            autocomplete="new-password"
-          />
+          <div class="d-flex custom-input-area position-relative">
+            <input
+              type="password"
+              class="input-area"
+              required
+              name="confirmPassword"
+              placeholder="Enter confirm password"
+              (focusout)="validatepassword()"
+              (input)="changetopassword($event)"
+              (keyup)="changetopassword($event)"
+              formControlName="confirm_password"
+              autocomplete="new-password"
+              #confirmPasswordInput
+            />
+            <fa-icon
+              [icon]="
+                confirmPasswordHidden ? ['fas', 'eye'] : ['fas', 'eye-slash']
+              "
+              class="font-20-px position-absolute cursor"
+              (click)="toggleConfirmPasswordVisibility(confirmPasswordInput)"
+            ></fa-icon>
+          </div>
           <div
             class="text-danger"
             *ngIf="
@@ -182,8 +197,9 @@
 
         <div class="col-12 col-md-6 mb-3">
           <label class="form-label"
-            >Mobile<span class="text-danger">*</span></label
-          >
+            >Mobile
+            <!-- <span class="text-danger">*</span> -->
+          </label>
           <input
             type="number"
             class="input-area"
@@ -191,7 +207,7 @@
             placeholder="Enter your mobile number"
             formControlName="MobileNo"
           />
-          <div
+          <!-- <div
             class="text-danger"
             *ngIf="
               registerForm.get('MobileNo').hasError('required') &&
@@ -199,7 +215,7 @@
             "
           >
             Mobile number is required.
-          </div>
+          </div> -->
         </div>
 
         <div class="col-12 col-md-6 mb-3">
@@ -212,6 +228,7 @@
             name="Country"
             class="input-area w-100"
             formControlName="Country"
+            (change)="onCountryChange($event)"
           >
             <option [value]="defaultCountry">United states</option>
             <option
@@ -252,14 +269,17 @@
           <label class="form-label"
             >State<span class="text-danger">*</span></label
           >
-          <input
-            type="text"
-            class="input-area"
+          <select
+            id="State"
             required
-            placeholder="Enter your state"
             name="State"
+            class="input-area w-100"
             formControlName="State"
-          />
+          >
+            <option *ngFor="let item of allStateData">
+              {{ item.state }}
+            </option>
+          </select>
           <div
             class="text-danger"
             *ngIf="
@@ -273,17 +293,17 @@
 
         <div class="col-12 col-md-6 mb-3">
           <label class="form-label"
-            >City<span class="text-danger">*</span></label
-          >
+            >City
+            <!-- <span class="text-danger">*</span> -->
+          </label>
           <input
             type="text"
             class="input-area"
-            required
             name="City"
             placeholder="Enter your city"
             formControlName="City"
           />
-          <div
+          <!-- <div
             class="text-danger"
             *ngIf="
               registerForm.get('City').hasError('required') &&
@@ -291,22 +311,22 @@
             "
           >
             City is required.
-          </div>
+          </div> -->
         </div>
 
         <div class="col-12 col-md-6 mb-3">
           <label class="form-label"
-            >County<span class="text-danger">*</span></label
-          >
+            >County
+            <!-- <span class="text-danger">*</span> -->
+          </label>
           <input
             type="text"
             class="input-area"
-            required
             name="County"
             placeholder="Enter your County"
             formControlName="County"
           />
-          <div
+          <!-- <div
             class="text-danger"
             *ngIf="
               registerForm.get('County').hasError('required') &&
@@ -314,7 +334,7 @@
             "
           >
             County is required.
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -342,6 +362,9 @@
 <div class="text-center mt-3">
   <p class="text-danger">
     If you are having technical issues, email
-    <a href="mailto:support@Chat.buzz">{{ "support@Chat.buzz" }}</a>
+    <a class="h5 c-pointer custom-primary" (click)="onClick($event)"
+      >{{ "support@Chat.buzz" }}
+      <fa-icon class="font-16-px ms-1" [icon]="['fas', 'copy']" />
+    </a>
   </p>
 </div>

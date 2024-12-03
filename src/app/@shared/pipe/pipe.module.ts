@@ -11,7 +11,6 @@ import { MessageDatePipe } from './message-date.pipe';
 import { HighlightPipe } from './hightlight-text.pipe';
 import { GetImageUrlPipe } from './get-image-url.pipe';
 import { SearchFilterPipe } from './search-filter.pipe';
-// import { SearchFilterPipe } from './search-filter.pipe';
 
 @NgModule({
   declarations: [

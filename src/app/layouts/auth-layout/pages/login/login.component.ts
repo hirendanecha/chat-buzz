@@ -88,7 +88,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       callback: function (token) {
         localStorage.setItem('captcha-token', token);
         this.captchaToken = token;
-        console.log(`Challenge Success ${token}`);
+        // console.log(`Challenge Success ${token}`);
         if (!token) {
           this.msg = 'invalid captcha kindly try again!';
           this.type = 'danger';
@@ -96,7 +96,6 @@ export class LoginComponent implements OnInit, AfterViewInit {
       },
     });
   }
-
   togglePasswordVisibility(passwordInput: HTMLInputElement) {
     passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
     this.passwordHidden = !this.passwordHidden;
@@ -183,5 +182,18 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.type = 'success';
       }
     });
+  }
+
+  onClick(event: MouseEvent): void {
+    event.preventDefault();
+    let listener = (e: ClipboardEvent) => {
+      let clipboard = e.clipboardData || window["clipboardData"];
+      clipboard.setData("text", 'support@chat.buzz');
+      e.preventDefault();
+      this.toastService.success('Email address copied');
+    };
+    document.addEventListener("copy", listener, false)
+    document.execCommand("copy");
+    document.removeEventListener("copy", listener, false);
   }
 }

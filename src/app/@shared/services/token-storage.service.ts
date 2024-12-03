@@ -28,7 +28,7 @@ export class TokenStorageService {
     this.cookieService.delete('auth-user', '/', environment.domain);
     // this.cookieService.deleteAll('/');
     localStorage.setItem('theme', theme);
-    this.toastService.success('Logout successfully');
+    this.toastService.success('Successfully Logged Out');
     this.router.navigate(['/']);
   }
 
@@ -58,7 +58,7 @@ export class TokenStorageService {
   }
 
   getCredentials(): any {
-    this._credentials = this.getUser();
+    // this._credentials = this.getUser();
     // const isAuthenticate = Object.keys(this._credentials || {}).length > 0;
     const token = this.getToken();
     const isAuthenticate = token ? true : false;
