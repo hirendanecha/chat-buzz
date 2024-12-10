@@ -160,6 +160,7 @@ export class ProfileChatsSidebarComponent
     this.sharedService.openModal$.subscribe(() => {
       this.invitePeople();
     });
+    this.cdr.markForCheck();
   }
 
   ngAfterViewInit(): void {
@@ -214,6 +215,7 @@ export class ProfileChatsSidebarComponent
           } else {
             this.hasMoreUsers = false;
           }
+          this.cdr.markForCheck();
         }
       },
       error: (error) => {
@@ -294,7 +296,7 @@ export class ProfileChatsSidebarComponent
         this.searchText = null;
       }
     }
-    this.cdr.markForCheck();
+    this.cdr.detectChanges();
   }
 
   goToViewProfile(): void {
@@ -379,6 +381,7 @@ export class ProfileChatsSidebarComponent
         this.socketService?.createGroup(res, (data: any) => {
           this.getChatList();
           this.getGroupList();
+          this.cdr.markForCheck();
         });
       }
     });
