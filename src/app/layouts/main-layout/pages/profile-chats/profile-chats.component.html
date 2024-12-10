@@ -1,4 +1,4 @@
-<ng-container *ngIf="sharedService?.userData?.MediaApproved; else pendingApproval">
+<ng-container *ngIf="(sharedService.loginUserInfo | async)?.MediaApproved; else pendingApproval">
   <div class="d-block d-lg-none chat-list-btn">
     <div class="d-flex justify-content-between p-3 mx-10">
       <button

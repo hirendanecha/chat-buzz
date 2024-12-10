@@ -32,26 +32,22 @@ export class SocketService {
 
   connect(): void {
     if (isPlatformBrowser(this.platformId)) {
-      const token = localStorage.getItem("auth-token");
+      const token = localStorage.getItem('auth-token');
       if (token) {
         const customHeaders = {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         };
-        // if (this.socket) {
-        //   this.socket?.close();
-        // }
-        if (!this.socket) {
-          this.socket = io(environment.socketUrl, {
-            reconnectionDelay: 100,
-            reconnectionDelayMax: 300,
-            reconnection: true,
-            randomizationFactor: 0.2,
-            // timeout: 120000,
-            reconnectionAttempts: 50000,
-            transports: ['websocket'],
-            auth: customHeaders
-          });
-        }
+        const socketUrl = environment.socketUrl;
+        this.socket = io(socketUrl, {
+          reconnectionDelay: 100,
+          reconnectionDelayMax: 300,
+          reconnection: true,
+          randomizationFactor: 0.2,
+          // timeout: 120000,
+          reconnectionAttempts: 50000,
+          transports: ['websocket'],
+          auth: customHeaders,
+        });
       }
     }
   }
@@ -211,5 +207,9 @@ export class SocketService {
 
   checkRoom(params, callback: (data: any) => void) {
     this.socket.emit('check-room', params, callback);
+  }
+  
+  logout(params, callback: (data: any) => void) {
+    this.socket.emit('logout', params, callback);
   }
 }

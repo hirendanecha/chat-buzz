@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -15,6 +16,7 @@ import { CustomerService } from '../../services/customer.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 import { MessageService } from '../../services/message.service';
+import { EmojiPaths } from '../../constant/emoji';
 
 @Component({
   selector: 'app-tag-user-input',
@@ -37,7 +39,6 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
   @ViewChild('tagInputDiv', { static: false }) tagInputDiv: ElementRef;
   @ViewChild('userSearchDropdownRef', { static: false, read: NgbDropdown })
   userSearchNgbDropdown: NgbDropdown;
-
   metaDataSubject: Subject<void> = new Subject<void>();
 
   userList = [];
@@ -47,26 +48,14 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
 
   copyImage: any;
   profileId: number;
-  emojiPaths = [
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Heart.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Cool.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Anger.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Censorship.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Hug.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Kiss.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/LOL.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Party.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Poop.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Sad.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Thumbs-UP.gif',
-    'https://s3.us-east-1.wasabisys.com/freedom-social/freedom-emojies/Thumbs-down.gif',
-  ];
+  emojiPaths = EmojiPaths;
 
   constructor(
     private renderer: Renderer2,
     private customerService: CustomerService,
     private spinner: NgxSpinnerService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {
     this.metaDataSubject.pipe(debounceTime(200)).subscribe(() => {
       this.getMetaDataFromUrlStr();
@@ -95,6 +84,9 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
   }
 
   messageOnKeyEvent(): void {
+    if (this.isCustomeSearch) {
+      this.cdr.detectChanges();
+    };
     this.metaDataSubject.next();
     this.emitChangeEvent();
   }
@@ -193,6 +185,7 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
           .subscribe({
             next: (res: any) => {
               this.isMetaLoader = false;
+              this.spinner.hide();
               if (res?.meta?.image) {
                 const urls = res.meta?.image?.url;
                 const imgUrl = Array.isArray(urls) ? urls?.[0] : urls;
@@ -284,6 +277,7 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
             const afterText = node.nodeValue?.substring(cursorOffset);
 
             const replacedText = `${beforeText}${replacement}${afterText}`;
+            this.clearUserSearchData();
             const span = document.createElement('span');
             span.innerHTML = replacedText;
             while (span.firstChild) {
@@ -340,6 +334,7 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
 
   getUserList(search: string): void {
     if (this.isCustomeSearch) {
+      this.cdr.detach();
       this.messageService
         .getRoomProfileList(search, this.isCustomeSearch)
         .subscribe({
@@ -375,6 +370,9 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
   clearUserSearchData(): void {
     this.userNameSearch = '';
     this.userList = [];
+    if (this.isCustomeSearch) {
+      this.cdr.reattach();
+    }
   }
 
   clearMetaData(): void {

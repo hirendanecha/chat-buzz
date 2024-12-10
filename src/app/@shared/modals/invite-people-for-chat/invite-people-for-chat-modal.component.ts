@@ -82,4 +82,9 @@ export class InvitePeopleForChatModalComponent {
   removeUser() {
     this.selectedUsers = {};
   }
+
+  closeModal(): void {
+    this.activeModal.close('cancel');
+    this.sharedService.openModalSubject.next(null);
+  }
 }

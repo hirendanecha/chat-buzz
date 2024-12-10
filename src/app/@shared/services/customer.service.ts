@@ -61,11 +61,11 @@ export class CustomerService {
       `${this.baseUrl}/countries`
     );
   }
-
+  
   getStateData(country: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/states?countryCode=${country}`);
   }
-
+  
   createProfile(data: Object): Observable<Object> {
     return this.http.post(`${this.baseUrl}/profile`, data);
   }
@@ -76,7 +76,7 @@ export class CustomerService {
     );
   }
 
-  updateProfile(id, customer: Customer): Observable<Object> {
+  updateProfile(id, customer): Observable<Object> {
     const token = localStorage.getItem('auth-token');
     return this.http.put(`${this.baseUrl}/profile/${id}`, customer, {
       headers: {
@@ -115,6 +115,18 @@ export class CustomerService {
     );
   }
 
+  readAllNotification(id: number): Observable<any> {
+    return this.http.get(
+      `${this.baseUrl}/read-all-notification/${id}?q=${Date.now()}`
+    );
+  }
+
+  deleteAllNotification(id: number): Observable<any> {
+    return this.http.delete(
+      `${this.baseUrl}/delete-all-notification/${id}?q=${Date.now()}`
+    );
+  }
+
   logout(): Observable<any> {
     return this.http.get(`${this.baseUrl}/logout`, httpOptions);
   }
@@ -141,17 +153,5 @@ export class CustomerService {
 
   updateNotificationSound(data: any): Observable<any> {
     return this.http.put(`${this.baseUrl}/onOff-notification`, data);
-  }
-
-  readAllNotification(id: number): Observable<any> {
-    return this.http.get(
-      `${this.baseUrl}/read-all-notification/${id}?q=${Date.now()}`
-    );
-  }
-
-  deleteAllNotification(id: number): Observable<any> {
-    return this.http.delete(
-      `${this.baseUrl}/delete-all-notification/${id}?q=${Date.now()}`
-    );
   }
 }
