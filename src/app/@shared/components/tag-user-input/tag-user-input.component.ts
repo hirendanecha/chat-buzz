@@ -92,7 +92,9 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
   }
 
   checkUserTagFlag(): void {
-    this.userList = [];
+    if (!this.isCustomeSearch) {
+      this.userList = [];
+    };
     if (this.isAllowTagUser) {
       let htmlText = this.tagInputDiv?.nativeElement?.innerHTML || '';
       const anchorTagRegex =
@@ -132,7 +134,7 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
         if (
           foundValidTag &&
           this.userNameSearch &&
-          this.userNameSearch.length >= 0 &&
+          this.userNameSearch.length > 0 &&
           !this.isCustomeSearch
         ) {
           this.getUserList(this.userNameSearch);
@@ -332,7 +334,7 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
     this.emitChangeEvent();
   }
 
-  getUserList(search: string): void {
+  getUserList(search: string): void { 
     if (this.isCustomeSearch) {
       this.cdr.detach();
       this.messageService
@@ -351,11 +353,13 @@ export class TagUserInputComponent implements OnChanges, OnDestroy {
             this.clearUserSearchData();
           },
         });
-    } else {
+    } else if (search) {
       this.customerService.getProfileList(search).subscribe({
         next: (res: any) => {
           if (res?.data?.length > 0) {
-            this.userList = res.data.map((e) => e);
+            this.userList = res.data.filter((e: any) =>
+              e.Username.replace(/\s+/g, '').length > 0
+          );
           } else {
             this.clearUserSearchData();
           }
